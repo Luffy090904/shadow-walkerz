@@ -1,0 +1,19 @@
+{% extends 'forum/base.html' %}
+{% block content %}
+<h2 class="mb-4">All Questions</h2>
+{% for question in questions %}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <h5><a href="{% url 'question_detail' question.pk %}" class="text-decoration-none">{{ question.title }}</a></h5>
+      <p class="mb-1 text-muted">by {{ question.user.username }} on {{ question.created_at|date:"M d, Y H:i" }}</p>
+      <div>
+        {% for tag in question.tags.all %}
+          <span class="badge bg-secondary">{{ tag.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% empty %}
+  <p>No questions posted yet.</p>
+{% endfor %}
+{% endblock %}

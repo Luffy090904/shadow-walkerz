@@ -1,0 +1,68 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<h2>Ask a Question</h2>
+
+<form method="post" id="question-form">
+  {% csrf_token %}
+
+  <!-- Title -->
+  <div class="mb-3">
+    {{ form.title.label_tag }}
+    {{ form.title }}
+  </div>
+
+  <!-- Description (Quill) -->
+  <div class="mb-3">
+    <label for="editor">Description</label>
+    <div id="editor" style="height: 200px; background-color: white; border: 1px solid #ccc;"></div>
+    <input type="hidden" name="description" id="descriptionField">
+  </div>
+
+  <!-- Tags -->
+  <div class="mb-3">
+    {{ form.tags.label_tag }}
+    {{ form.tags }}
+  </div>
+
+  <button type="submit" class="btn btn-success">Post Question</button>
+</form>
+
+<!-- Show form validation errors -->
+{% if form.errors %}
+  <div class="alert alert-danger mt-3">
+    {{ form.errors }}
+  </div>
+{% endif %}
+
+<!-- Load Quill -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<!-- Sync Quill content on form submit -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const quill = new Quill('#editor', {
+      theme: 'snow'
+    });
+
+    const form = document.getElementById('question-form');
+    const hiddenInput = document.getElementById('descriptionField');
+
+    form.addEventListener('submit', function (e) {
+      const html = quill.root.innerHTML.trim();
+
+      // Debug log (check if content is syncing)
+      console.log("Quill HTML content:", html);
+
+      if (!html || html === '<p><br></p>') {
+        e.preventDefault();
+        alert("Please enter a description.");
+        return;
+      }
+
+      hiddenInput.value = html;
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<h2>{{ question.title }}</h2>
+<p class="text-muted">Posted by {{ question.user.username }} on {{ question.created_at|date:"M d, Y H:i" }}</p>
+<div class="mb-3">{{ question.description|safe }}</div>
+<div>
+    {% for tag in question.tags.all %}
+    <span class="badge bg-info text-dark">{{ tag.name }}</span>
+    {% endfor %}
+</div>
+
+{% if user.is_authenticated and user == question.user %}
+<form action="{% url 'delete_question' question.pk %}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger btn-sm my-2">Delete Question</button>
+</form>
+{% endif %}
+
+<hr>
+
+<h4>Answers</h4>
+{% for answer in answers %}
+<div class="border rounded p-3 mb-3">
+    <p>{{ answer.description|safe }}</p>
+    <small class="text-muted">by {{ answer.user.username }} on {{ answer.created_at|date:"M d, Y H:i" }}</small>
+</div>
+{% empty %}
+<p>No answers yet. Be the first!</p>
+{% endfor %}
+
+{% if user.is_authenticated %}
+<hr>
+<h5>Your Answer</h5>
+<form method="post">
+    {% csrf_token %}
+    <label for="editor">Your Answer</label>
+    <div id="editor" style="height: 150px;"></div>
+    <input type="hidden" name="description" id="descriptionField">
+    <button type="submit" class="btn btn-success mt-2">Submit Answer</button>
+</form>
+
+<script>
+    const quill = new Quill('#editor', { theme: 'snow' });
+    const form = document.querySelector('form');
+    form.onsubmit = function () {
+        const content = document.querySelector('input[name=description]');
+        content.value = quill.root.innerHTML;
+    };
+</script>
+
+{% else %}
+<p><a href="{% url 'login' %}">Login</a> to post an answer.</p>
+{% endif %}
+{% endblock %}
